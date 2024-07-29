@@ -1,11 +1,13 @@
 package app
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
 var (
@@ -164,4 +166,30 @@ func containsDVPairs(s []stakingtypes.DVPair, e stakingtypes.DVPair) bool {
 		}
 	}
 	return false
+}
+
+func (app *RealioNetwork) ScheduleForkUpgrade1(ctx sdk.Context) {
+	upgradePlan := upgradetypes.Plan{
+		Height: ctx.BlockHeight()+10,
+	}
+
+	// handle mainnet forks with their corresponding upgrade name and info
+	switch ctx.BlockHeight()+10 {
+	case 7302000:
+		upgradePlan.Name = "v2"
+	default:
+		// No-op
+		return
+	}
+
+	// schedule the upgrade plan to the current block height, effectively performing
+	// a hard fork that uses the upgrade handler to manage the migration.
+	if err := app.UpgradeKeeper.ScheduleUpgrade(ctx, upgradePlan); err != nil {
+		panic(
+			fmt.Errorf(
+				"failed to schedule upgrade %s during BeginBlock at height %d: %w",
+				upgradePlan.Name, ctx.BlockHeight(), err,
+			),
+		)
+	}
 }

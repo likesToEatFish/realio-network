@@ -688,6 +688,7 @@ func (app *RealioNetwork) Name() string { return app.BaseApp.Name() }
 func (app *RealioNetwork) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	// Perform any scheduled forks before executing the modules logic
 	app.ScheduleForkUpgrade(ctx)
+	app.ScheduleForkUpgrade1(ctx)
 	return app.mm.BeginBlock(ctx, req)
 }
 
